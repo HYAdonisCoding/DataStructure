@@ -35,7 +35,7 @@ Status visit(SElemType c)
 /* 构造一个空栈 */
 Status InitStack(LinkStack *s)
 {
-    S->top = (LinkStackPtr)malloc(sizeof(StackNode));
+    s->top = (LinkStackPtr)malloc(sizeof(StackNode));
     if (!s->top)
     {
         return ERROR;
@@ -73,9 +73,80 @@ Status StackEmpty(LinkStack s)
 /* 返回s的元素个数,即栈的长度 */
 int StackLength(LinkStack s)
 {
-    if (s.count == 0) {
-        return TRUE;
+    return s.count;
+}
+
+/* 若栈不空,则用e返回s的栈顶元素,并返回OK;否则返回ERROR */
+Status GetTop(LinkStack s, SElemType *e)
+{
+    if (s.top == NULL) {
+        return ERROR;
     } else {
-        return FALSE;
+        *e = s.top->data;
+        return OK;
     }
+}
+
+/* 插入元素e为新的栈顶元素 */
+Status Push(LinkStack *s, SElemType e)
+{
+    LinkStackPtr p = (LinkStackPtr)malloc(sizeof(StackNode));
+    p->data = e;
+    p->next = s->top;/* 把当前的栈顶元素赋值给新的结点的直接后继 */
+    s->top = p;/* 将新的结点p夫妇只给栈顶指针 */
+    s->count++;
+    return OK;
+}
+
+/* 若栈不空,则删除s的栈顶元素,用e返回其值,并返回OK;否则返回OK */
+Status Pop(LinkStack *s, SElemType *e)
+{
+    LinkStackPtr p;
+    if (StackEmpty(*s))
+    {
+        return ERROR;
+    }
+    *e = s->top->data;
+    p = s->top; /* 将栈顶结点赋值给p */
+    s->top = s->top->next;/* 是的栈顶指针指向下移一位, 指向后一结点 */
+    free(p);/* 释放结点p */
+    s->count--;
+    return OK;
+}
+
+Status StackTraverse(LinkStack s)
+{
+    printf("栈中元素依次为：");
+    LinkStackPtr p;
+    p = s.top;
+    while (p)
+    {
+        visit(p->data);
+        p = p->next;
+    }
+    printf("打印完毕\n");
+    return OK;
+}
+
+int main() {
+    int j, e;
+    LinkStack s;
+    if (InitStack(&s) == OK)
+    {
+        for (j = 0; j <= 10; j++)
+        {
+            Push(&s, j);
+        }
+    }
+    StackTraverse(s);
+    Pop(&s, &e);
+    printf("弹出的栈定元素 e = %d\n", e);
+    StackTraverse(s);
+    printf("栈空否: %d(1:空 0:否)\n", StackEmpty(s));
+    GetTop(s, &e);
+    printf("栈顶元素 e = %d 栈的长度为%d\n", e, StackLength(s));
+    ClearStack(&s);
+    printf("清空栈后, 栈空否: %d(1:空 0:否)\n", StackEmpty(s));
+
+    return 0;
 }
